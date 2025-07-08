@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Envoi en masse depuis fichier Excel</title>
+  <style>
+    /* Reset basique */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background-color: #f0f4ff;
+      color: #1a237e;
+      max-width: 900px;
+      margin: 40px auto;
+      padding: 30px 40px;
+      border-radius: 8px;
+      box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+    }
+
+    h1 {
+      font-weight: 700;
+      margin-bottom: 30px;
+      color: #10227a;
+      text-align: center;
+    }
+
+    form {
+      background: white;
+      padding: 25px 30px;
+      border-radius: 6px;
+      box-shadow: 0 3px 12px rgba(16,34,122,0.15);
+      margin-bottom: 40px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: #10227a;
+    }
+
+    select, input[type="text"], input[type="email"], textarea {
+      width: 100%;
+      padding: 10px 14px;
+      font-size: 16px;
+      border: 1.8px solid #c5cae9;
+      border-radius: 4px;
+      margin-bottom: 18px;
+      transition: border-color 0.3s ease;
+    }
+    select:focus, input:focus, textarea:focus {
+      outline: none;
+      border-color: #1e40af;
+      box-shadow: 0 0 6px #9bb7f0;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 120px;
+      font-family: monospace;
+      color: #333;
+    }
+
+    button {
+      background: linear-gradient(90deg, #f97316, #ea580c);
+      border: none;
+      padding: 12px 20px;
+      color: white;
+      font-weight: 700;
+      font-size: 16px;
+      cursor: pointer;
+      border-radius: 5px;
+      box-shadow: 0 5px 10px rgb(234 88 12 / 0.4);
+      transition: background 0.4s ease;
+    }
+    button:hover {
+      background: linear-gradient(90deg, #ea580c, #f97316);
+    }
+
+    #result-excel {
+      background-color: #e8f5e9;
+      border: 2px solid #2e7d32;
+      color: #2e7d32;
+      font-weight: 600;
+      padding: 15px 20px;
+      max-height: 300px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      border-radius: 6px;
+    }
+
+    /* Style du select template pour qu'il soit plus visible */
+    select#template-select-excel {
+      font-weight: 600;
+      color: #1e40af;
+      border-color: #3b82f6;
+    }
+.btn-download {
+  display: inline-block;
+  padding: 10px 16px;
+  background-color: #1e88e5;
+  color: white;
+  font-weight: bold;
+  border-radius: 6px;
+  text-decoration: none;
+  transition: background 0.3s ease;
+}
+.btn-download:hover {
+  background-color: #1565c0;
+}
+
+
+  </style>
+</head>
+<body>
+  <h1>Envoi en masse depuis fichier Excel</h1>
+
+  <form id="excel-form">
+    <label for="template-select-excel">Choisir un template :</label>
+    <select id="template-select-excel" name="templateId"></select>
+
+    <label for="subject-excel">Sujet :</label>
+    <input id="subject-excel" type="text" name="subject" placeholder="Sujet" required />
+
+    <label for="message-excel">Message (optionnel, écrase le template) :</label>
+    <textarea id="message-excel" name="message" placeholder="Écris ton message ici, utilise {{ Prénom }}, {{ Nom }}, etc."></textarea>
+
+    <label for="file-input-excel">Fichier Excel (.xlsx, .csv) :</label>
+    <input id="file-input-excel" type="file" name="file" accept=".xlsx,.xls,.csv" required />
+
+    <button type="submit">Envoyer les emails</button>
+  </form>
+
+  <div id="result-excel"></div>
+
+  <script src="script.js"></script>
+</body>
+</html>

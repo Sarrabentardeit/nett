@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Scraping Google Maps</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f0f4f8;
+      padding: 20px;
+      color: #333;
+      max-width: 900px;
+      margin: auto;
+    }
+
+    h1 {
+      color: #0d47a1; /* bleu app */
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 0.3rem;
+      font-weight: bold;
+      color: #0d47a1;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 8px 12px;
+      font-size: 1rem;
+      border-radius: 6px;
+      border: 1px solid #bbb;
+      margin-bottom: 12px;
+      box-sizing: border-box;
+    }
+
+    button {
+      background-color: #0d47a1; /* bleu app */
+      color: white;
+      border: none;
+      padding: 12px 25px;
+      border-radius: 8px;
+      font-weight: bold;
+      font-size: 1rem;
+      cursor: pointer;
+      box-shadow: 0 4px 8px rgba(13, 71, 161, 0.3);
+      transition: background-color 0.3s ease;
+      margin-bottom: 20px;
+      display: block;
+      width: 200px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    button:hover {
+      background-color: #083b79;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      background: white;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 0 8px rgba(0,0,0,0.1);
+    }
+
+    th, td {
+      padding: 12px 15px;
+      border-bottom: 1px solid #ddd;
+      text-align: left;
+      font-size: 0.9rem;
+    }
+
+    th {
+      background-color: #0d47a1;
+      color: white;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    #downloadBtn {
+      display: none;
+      margin: 20px auto;
+      background-color: #2e7d32; /* vert app */
+      width: 220px;
+      font-size: 1rem;
+      font-weight: 600;
+      box-shadow: 0 4px 8px rgba(46, 125, 50, 0.3);
+    }
+    #downloadBtn:hover {
+      background-color: #225522;
+    }
+
+    /* Responsive */
+    @media (max-width: 600px) {
+      th, td {
+        font-size: 0.8rem;
+        padding: 8px 10px;
+      }
+      button, #downloadBtn {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Scraping Google Maps</h1>
+
+  <label for="keyword">Mot-clé à rechercher</label>
+  <input type="text" id="keyword" placeholder="Ex: café, restaurant, pharmacie" />
+
+  <button onclick="scrape()">Lancer le scraping</button>
+
+  <h2>Résultats</h2>
+  <table id="resultsTable" aria-label="Résultats du scraping">
+    <thead>
+      <tr>
+        <th>Titre</th>
+        <th>Évaluation</th>
+        <th>Avis</th>
+        <th>Adresse</th>
+        <th>Téléphone</th>
+        <th>Site Web</th>
+      </tr>
+    </thead>
+    <tbody id="results"></tbody>
+  </table>
+
+  <button id="downloadBtn" onclick="downloadCSV()">Télécharger CSV</button>
+
+  <script>
+    async function scrape() {
+      const keyword = document.getElementById("keyword").value.trim();
+      const resultsEl = document.getElementById("results");
+      const downloadBtn = document.getElementById("downloadBtn");
+
+      if (!keyword) {
+        alert("Veuillez saisir un mot-clé pour lancer le scraping.");
+        return;
+      }
+
+      resultsEl.innerHTML = "";
+      downloadBtn.style.display = "none";
+
+      try {
+        const response = await fetch("http://localhost:4000/scrape", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ keyword }),
+        });
+
+        const data = await response.json();
+
+        if (response.ok && data.results && data.results.length) {
+          displayResults(data.results);
+          downloadBtn.style.display = "block";
+        } else {
+          resultsEl.innerHTML = `<tr><td colspan="6" style="text-align:center; color: #c00;">Erreur : ${data.error || 'Aucun résultat trouvé'}</td></tr>`;
+          downloadBtn.style.display = "none";
+        }
+      } catch (error) {
+        resultsEl.innerHTML = `<tr><td colspan="6" style="text-align:center; color: #c00;">Erreur de connexion au serveur.</td></tr>`;
+        downloadBtn.style.display = "none";
+      }
+    }
+
+    function displayResults(results) {
+      const resultsEl = document.getElementById("results");
+      resultsEl.innerHTML = "";
+
+      results.forEach(result => {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td>${escapeHTML(result.title)}</td>
+          <td>${escapeHTML(result.rating)}</td>
+          <td>${escapeHTML(result.reviews)}</td>
+          <td>${escapeHTML(result.address)}</td>
+          <td>${escapeHTML(result.phone)}</td>
+          <td>${result.website && result.website !== "Non disponible" ? `<a href="${escapeHTML(result.website)}" target="_blank" rel="noopener noreferrer">${escapeHTML(result.website)}</a>` : "Non disponible"}</td>
+        `;
+        resultsEl.appendChild(row);
+      });
+    }
+
+    function downloadCSV() {
+      const rows = document.querySelectorAll("#resultsTable tbody tr");
+      if (!rows.length) {
+        alert("Aucun résultat à télécharger.");
+        return;
+      }
+
+      const data = [];
+      rows.forEach(row => {
+        const cols = row.querySelectorAll("td");
+        data.push({
+          title: cols[0].textContent,
+          rating: cols[1].textContent,
+          reviews: cols[2].textContent,
+          address: cols[3].textContent,
+          phone: cols[4].textContent,
+          website: cols[5].textContent,
+        });
+      });
+
+      const csvContent = convertToCSV(data);
+      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = "results_scraping.csv";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    function convertToCSV(data) {
+      const headers = Object.keys(data[0]);
+      const rows = data.map(row => headers.map(header => `"${(row[header] || '').replace(/"/g, '""')}"`).join(","));
+      return [headers.join(","), ...rows].join("\n");
+    }
+
+    // Helper pour éviter injection HTML dans tableau
+    function escapeHTML(text) {
+      if (!text) return "";
+      return text.replace(/[&<>"']/g, function (m) {
+        return {
+          '&': '&amp;',
+          '<': '&lt;',
+          '>': '&gt;',
+          '"': '&quot;',
+          "'": '&#39;'
+        }[m];
+      });
+    }
+  </script>
+</body>
+</html>
