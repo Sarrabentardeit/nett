@@ -1,5 +1,8 @@
 flask
+flask-cors
+pandas
+openpyxl
+dnspython
 gunicorn
 requests
-pandas
 numpy

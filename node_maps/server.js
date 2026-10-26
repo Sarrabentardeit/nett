@@ -48,6 +48,16 @@ app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "frontend", "scrapping.html"));
 });
 
-app.listen(PORT, () => {
+app.listen(PORT, (err) => {
+  if (err) {
+    if (err.code === "EADDRINUSE") {
+      console.error(`❌ Le port ${PORT} est déjà utilisé par un autre programme.`);
+      console.error("Ferme cet autre serveur, puis relance : npm start");
+    } else {
+      console.error("❌ Impossible de démarrer le serveur :", err.message);
+    }
+    process.exit(1);
+  }
+
   console.log(`🚀 Serveur démarré sur http://localhost:${PORT}`);
 });

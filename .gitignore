@@ -1,0 +1,15 @@
+node_modules/
+__pycache__/
+*.pyc
+
+.env
+.env.*
+!.env.example
+
+python_cleaning/uploads/
+python_cleaning/cleaned/
+python_email/uploads/
+python_email/downloads/
+
+node_maps/results_detailed.json
+node_maps/results_detailed.csv

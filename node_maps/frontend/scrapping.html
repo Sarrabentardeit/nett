@@ -148,7 +148,7 @@
       downloadBtn.style.display = "none";
 
       try {
-        const response = await fetch("http://localhost:4000/scrape", {
+        const response = await fetch("/scrape", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ keyword }),
